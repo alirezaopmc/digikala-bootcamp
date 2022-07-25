@@ -7,7 +7,10 @@
 
 using namespace std;
 
-int n;
+int n; // Number of nodes
+int m; // Number of edges
+int s; // Source node
+
 int dfs_timer = 0;
 
 vector<vector<int>> adj; // Adjacancy List
@@ -27,7 +30,7 @@ void init() {
   tree.assign(n, 0);
   h.assign(n, -1);
 }
-
+  
 void dfs(int v) {
   mrk[v] = true;
   st[v] = dfs_timer++;
@@ -51,8 +54,27 @@ void dfs(int v) {
 
 
 int main() {
-  ios_base::sync_with_stdio(false);
-  cin.tie(NULL);
+//  ios_base::sync_with_stdio(false);
+//  cin.tie(NULL);
 
-  // Your code here
+  cin >> n;
+  cin >> m;
+  cin >> s;
+
+  init();
+
+  s--; // 0-based index
+
+  for(int i=0; i<m; i++) {
+    int x, y;
+    cin >> x >> y;
+    x--; y--;
+
+    adj[x].push_back(y);
+    adj[y].push_back(x);
+  }
+
+  dfs(s);
+
+  // Your code goes here or in dfs function
 }
