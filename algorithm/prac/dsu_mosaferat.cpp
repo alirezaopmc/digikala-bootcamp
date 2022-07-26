@@ -1,53 +1,54 @@
-/* Mosaferat
+/** DFS Mosaferat
  * Alireza Jafartash
  */
 
 #include <iostream>
 #include <vector>
+#include <map>
 #include <set>
 
 using namespace std;
 
 const int N = 1000;
-const int MAXN = N * 2;
-int n;
+int x_cnt = 1;
+int y_cnt = N + 1;
 
-typedef struct point {
-  int x;
-  int y;
-} point;
+map<int, int> _tx;
+map<int, int> _ty;
 
-/**
- * DSU Optmization:
- *  Size-in-Par
- *  Path Compression
- */
-vector<int> par; // DSU Parents
-vector<point> points; // Points
+vector<int> X;
+vector<int> Y;
 
-void init() {
-  par.assign(MAXN, -1); // Roots keep negative of size
-  points.resize(n);
+int tx(int x) {
+  if (_tx[x] == 0) _tx[x] = x_cnt++;
+  return _tx[x];
 }
 
-int find(int u) {
-  int root = u;
-  
-  // Path Compression
-  while(par[root] >= 0) {
-    root = par[root];
-  }
+int ty(int y) {
+  if (_ty[y] == 0) _ty[y] = y_cnt++;
+  return _ty[y];
+}
 
-  while(par[u] >= 0) {
-    par[u] = root;
-    u = par[u];
+vector<int> P; // Parent
+
+int find(int u) {
+  if (P[u] < 0) return u;
+
+  int root = u;
+
+  while(P[root] >= 0) root = P[root];
+
+  while(P[u] >= 0) {
+    int tmp = P[u];
+    P[u] = root;
+    u = P[u];
   }
 
   return root;
 }
 
-int size(int u) {
-  return -par[find(u)];
+int rnk(int u) {
+  return - P[find(u)];
 }
 
 void merge(int u, int v) {
@@ -56,70 +57,42 @@ void merge(int u, int v) {
 
   if (pu == pv) return;
 
-  if (size(u) > size(v)) {
-    par[pu] += par[pv];
-    par[pv] = pu;
+  if (rnk(u) < rnk(v)) {
+    P[pv] += P[pu];
+    P[pu] = pv;
   } else {
-    par[pv] += par[pu];
-    par[pu] = pv;
+    P[pu] += P[pv];
+    P[pv] = pu;
   }
 }
 
-void mergePoint(point p) {
-  int xIndex = p.x-1;
-  int yIndex = N + p.y-1;
-
-  merge(xIndex, yIndex);
-}
-
-int findPoint(point p) {
-  return find(p.x-1);
-}
 
 int main() {
-//  ios_base::sync_with_stdio(false);
-//  cin.tie(NULL);
-
-
+  int n;
   cin >> n;
 
-  init();
+  P.assign(2*N+1, -1);
+  X.assign(n, -1);
+  Y.assign(n, -1);
 
+  int x, y;
   for(int i=0; i<n; i++) {
-    int x, y;
+    cin >> x >> y;
 
-    cin >> points[i].x;
-    cin >> points[i].y;
+    x = tx(x);
+    y = ty(y);
 
-    mergePoint(points[i]);
+    X[i] = x;
+    Y[i] = y;
+
+    merge(x, y);
   }
 
-
-/*
-  string s;
-  while(true) {
-    cin >> s;
-
-    if (s == "exit") break;
-    else if (s == "find") {
-      int u;
-      cin >> u;
-      cout << find(u) << endl;
-    }
-    else if (s == "merge") {
-      int u, v;
-      cin >> u >> v;
-      merge(u, v);
-    }
-  }
-
-  return 0;
-*/
   set<int> st;
 
-  for(auto p: points) {
-    st.insert(findPoint(p));
+  for(int i=0; i<n; i++) {
+    st.insert(find(X[i]));
   }
 
-  cout << (st.size()-1) << endl;
+  cout << (st.size() - 1) << endl;
 }
